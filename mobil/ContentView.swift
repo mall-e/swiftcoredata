@@ -1,78 +1,73 @@
-//
-//  ContentView.swift
-//  mobil
-//
-//  Created by Muhammet Ali Yazıcı on 12.12.2024.
-//
-
 import SwiftUI
 import CoreData
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
+    @State private var oturumAcik: Bool = true // Çıkış yapmak için kontrol
+    @State private var kitapEkleModalAcik: Bool = false
+
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Kitap.baslik, ascending: true)],
         animation: .default)
-    private var items: FetchedResults<Item>
+    private var kitaplar: FetchedResults<Kitap>
 
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+        if oturumAcik {
+            NavigationView {
+                List {
+                    ForEach(kitaplar) { kitap in
+                        NavigationLink(destination: KitapDuzenleView(kitap: kitap)) {
+                            Text(kitap.baslik ?? "Bilinmiyor")
+                        }
+                    }
+                    .onDelete(perform: deleteKitap)
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: {
+                            oturumAcik = false // Çıkış işlemi
+                        }) {
+                            Text("Çıkış Yap")
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        EditButton()
+                    }
+                    ToolbarItem {
+                        Button(action: {
+                            kitapEkleModalAcik = true
+                        }) {
+                            Label("Kitap Ekle", systemImage: "plus")
+                        }
                     }
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                .sheet(isPresented: $kitapEkleModalAcik) {
+                    KitapEkleView(isPresented: $kitapEkleModalAcik)
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+                .navigationTitle("Kitaplar")
             }
-            Text("Select an item")
+        } else {
+            LoginView()
         }
     }
 
-    private func addItem() {
+    private func deleteKitap(offsets: IndexSet) {
         withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+            offsets.map { kitaplar[$0] }.forEach(viewContext.delete)
 
             do {
                 try viewContext.save()
             } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                fatalError("Kitap silinirken hata oluştu: \(nsError), \(nsError.userInfo)")
             }
         }
     }
 }
+
+
+
 
 private let itemFormatter: DateFormatter = {
     let formatter = DateFormatter()

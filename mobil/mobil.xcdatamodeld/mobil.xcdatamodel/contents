@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="false" userDefinedModelVersionIdentifier="">
-    <entity name="Item" representedClassName="Item" syncable="YES" codeGenerationType="class">
-        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23507" systemVersion="23F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Kitap" representedClassName="Kitap" syncable="YES" codeGenerationType="class">
+        <attribute name="baslik" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="okunduMu" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="tur" optional="YES" attributeType="String"/>
+        <attribute name="yazar" optional="YES" attributeType="String"/>
+        <relationship name="okuyanlar" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Kullanici" inverseName="okunanKitaplar" inverseEntity="Kullanici"/>
     </entity>
-    <elements>
-        <element name="Item" positionX="-63" positionY="-18" width="128" height="44"/>
-    </elements>
+    <entity name="Kullanici" representedClassName="Kullanici" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isAdmin" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="kullaniciAdi" optional="YES" attributeType="String"/>
+        <attribute name="sifre" optional="YES" attributeType="String"/>
+        <relationship name="okunanKitaplar" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Kitap" inverseName="okuyanlar" inverseEntity="Kitap"/>
+    </entity>
 </model>
